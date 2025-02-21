@@ -50,6 +50,9 @@
             speed: 5
         };
 
+        // Healing blocks
+        let healingBlocks = [];
+
         // Basic enemy structure
         let enemies = [];
         
@@ -80,6 +83,18 @@
                 enemies.push(enemy);
             }
 
+            // Spawn new healing blocks
+            if (Math.random() < 0.03) {  // Adjust spawn rate
+                let healingBlock = {
+                    x: Math.random() * canvas.width,
+                    y: Math.random() * canvas.height,
+                    width: 30,
+                    height: 30,
+                    color: "blue"
+                };
+                healingBlocks.push(healingBlock);
+            }
+
             // Move and draw enemies
             for (let i = 0; i < enemies.length; i++) {
                 let enemy = enemies[i];
@@ -91,6 +106,20 @@
                 if (isCollision(player, enemy)) {
                     player.health -= 1;
                     enemies.splice(i, 1);
+                    i--;
+                }
+            }
+
+            // Draw and check for collision with healing blocks
+            for (let i = 0; i < healingBlocks.length; i++) {
+                let block = healingBlocks[i];
+                ctx.fillStyle = block.color;
+                ctx.fillRect(block.x, block.y, block.width, block.height);
+
+                // Check for collision with player
+                if (isCollision(player, block)) {
+                    player.health = Math.min(100, player.health + 10);  // Heal 10 health, max 100
+                    healingBlocks.splice(i, 1);
                     i--;
                 }
             }
@@ -108,11 +137,11 @@
         }
 
         // Check for collision
-        function isCollision(player, enemy) {
-            return player.x < enemy.x + enemy.width &&
-                player.x + player.width > enemy.x &&
-                player.y < enemy.y + enemy.height &&
-                player.y + player.height > enemy.y;
+        function isCollision(player, entity) {
+            return player.x < entity.x + entity.width &&
+                player.x + player.width > entity.x &&
+                player.y < entity.y + entity.height &&
+                player.y + player.height > entity.y;
         }
 
         // Handle key presses
