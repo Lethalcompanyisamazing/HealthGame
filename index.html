@@ -81,8 +81,8 @@
                 enemies.push(enemy);
             }
 
-            // Spawn new healing blocks (good blocks) - rarer now
-            if (Math.random() < 0.01) {  // Reduced spawn rate to make them rarer
+            // Spawn new healing blocks (good blocks) - much rarer now
+            if (Math.random() < 0.005) {  // Further reduced spawn rate to make them rarer (0.5% chance)
                 let healingBlock = {
                     x: Math.random() * canvas.width,
                     y: 0,
