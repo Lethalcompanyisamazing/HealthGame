@@ -10,12 +10,11 @@
             margin: 0;
             padding: 0;
             overflow: hidden;
-            background-color: #f0f4f8;
         }
         canvas {
             display: block;
             margin: 0 auto;
-            background-color: #ffffff;
+            background: linear-gradient(to bottom, #ade8f4, #f0f4f8); /* Light blue gradient for the respiratory theme */
         }
         .info {
             position: absolute;
@@ -56,9 +55,9 @@
         // Basic enemy structure
         let enemies = [];
         
-        // Block speed increasing over time
-        let fallSpeedIncrement = 0.1;
-
+        // Game time (used to gradually increase speed)
+        let gameTime = 0;
+        
         // Game Loop
         function gameLoop() {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -79,7 +78,7 @@
                     width: 30,
                     height: 30,
                     color: "red",
-                    speed: 2
+                    speed: 2  // Initial speed
                 };
                 enemies.push(enemy);
             }
@@ -92,16 +91,19 @@
                     width: 30,
                     height: 30,
                     color: "blue",
-                    speed: 2
+                    speed: 2  // Initial speed
                 };
                 healingBlocks.push(healingBlock);
             }
+
+            // Increase game time (used to make blocks fall faster)
+            gameTime += 1;
 
             // Move and draw enemies (bad blocks)
             for (let i = 0; i < enemies.length; i++) {
                 let enemy = enemies[i];
                 enemy.y += enemy.speed;
-                enemy.speed += fallSpeedIncrement;  // Gradually increase the falling speed
+                enemy.speed = 2 + gameTime / 500;  // Gradually increase speed over time
                 ctx.fillStyle = enemy.color;
                 ctx.fillRect(enemy.x, enemy.y, enemy.width, enemy.height);
 
@@ -117,7 +119,7 @@
             for (let i = 0; i < healingBlocks.length; i++) {
                 let block = healingBlocks[i];
                 block.y += block.speed;  // Healing blocks fall like enemies
-                block.speed += fallSpeedIncrement;  // Increase falling speed for healing blocks as well
+                block.speed = 2 + gameTime / 1000;  // Gradually increase speed for healing blocks as well
                 ctx.fillStyle = block.color;
                 ctx.fillRect(block.x, block.y, block.width, block.height);
 
