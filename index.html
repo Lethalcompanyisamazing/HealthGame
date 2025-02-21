@@ -70,7 +70,7 @@
             if (keys["ArrowLeft"]) player.x -= player.speed;
             if (keys["ArrowRight"]) player.x += player.speed;
 
-            // Spawn new enemies
+            // Spawn new enemies (bad blocks)
             if (Math.random() < 0.02) {
                 let enemy = {
                     x: Math.random() * canvas.width,
@@ -83,40 +83,42 @@
                 enemies.push(enemy);
             }
 
-            // Spawn new healing blocks
+            // Spawn new healing blocks (good blocks)
             if (Math.random() < 0.03) {  // Adjust spawn rate
                 let healingBlock = {
                     x: Math.random() * canvas.width,
-                    y: Math.random() * canvas.height,
+                    y: 0,
                     width: 30,
                     height: 30,
-                    color: "blue"
+                    color: "blue",
+                    speed: 2
                 };
                 healingBlocks.push(healingBlock);
             }
 
-            // Move and draw enemies
+            // Move and draw enemies (bad blocks)
             for (let i = 0; i < enemies.length; i++) {
                 let enemy = enemies[i];
                 enemy.y += enemy.speed;
                 ctx.fillStyle = enemy.color;
                 ctx.fillRect(enemy.x, enemy.y, enemy.width, enemy.height);
 
-                // Check for collision with player
+                // Check for collision with player (bad block)
                 if (isCollision(player, enemy)) {
-                    player.health -= 1;
+                    player.health -= 10;  // Bad blocks deal 10 damage
                     enemies.splice(i, 1);
                     i--;
                 }
             }
 
-            // Draw and check for collision with healing blocks
+            // Move and draw healing blocks (good blocks)
             for (let i = 0; i < healingBlocks.length; i++) {
                 let block = healingBlocks[i];
+                block.y += block.speed;  // Healing blocks fall like enemies
                 ctx.fillStyle = block.color;
                 ctx.fillRect(block.x, block.y, block.width, block.height);
 
-                // Check for collision with player
+                // Check for collision with player (healing block)
                 if (isCollision(player, block)) {
                     player.health = Math.min(100, player.health + 10);  // Heal 10 health, max 100
                     healingBlocks.splice(i, 1);
