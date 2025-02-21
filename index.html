@@ -5,51 +5,135 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Lung Defender</title>
     <style>
-        body { margin: 0; overflow: hidden; }
-        canvas { display: block; }
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            background-color: #f0f4f8;
+        }
+        canvas {
+            display: block;
+            margin: 0 auto;
+            background-color: #ffffff;
+        }
+        .info {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            font-size: 18px;
+            color: #333;
+            z-index: 10;
+        }
     </style>
 </head>
 <body>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <div class="info" id="info">Lung Defender - Protect the Respiratory System!</div>
+    <canvas id="gameCanvas"></canvas>
+    
     <script>
-        // Basic Three.js Setup
-        const scene = new THREE.Scene();
-        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-        const renderer = new THREE.WebGLRenderer();
-        renderer.setSize(window.innerWidth, window.innerHeight);
-        document.body.appendChild(renderer.domElement);
+        const canvas = document.getElementById("gameCanvas");
+        const ctx = canvas.getContext("2d");
 
-        // Player (represented as a cube for now)
-        const geometry = new THREE.BoxGeometry(1, 1, 1);
-        const material = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
-        const player = new THREE.Mesh(geometry, material);
-        scene.add(player);
+        // Resize the canvas to fit the screen
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
 
-        camera.position.z = 5;
+        // Player character
+        let player = {
+            x: canvas.width / 2,
+            y: canvas.height / 2,
+            width: 50,
+            height: 50,
+            color: "green",
+            health: 100,
+            speed: 5
+        };
 
-        // Player Movement
-        const keys = { w: false, a: false, s: false, d: false };
-        document.addEventListener('keydown', (event) => {
-            if (keys.hasOwnProperty(event.key)) keys[event.key] = true;
-        });
-        document.addEventListener('keyup', (event) => {
-            if (keys.hasOwnProperty(event.key)) keys[event.key] = false;
-        });
-
-        function updatePlayerPosition() {
-            if (keys.w) player.position.z -= 0.1;
-            if (keys.s) player.position.z += 0.1;
-            if (keys.a) player.position.x -= 0.1;
-            if (keys.d) player.position.x += 0.1;
-        }
-
+        // Basic enemy structure
+        let enemies = [];
+        
         // Game Loop
-        function animate() {
-            requestAnimationFrame(animate);
-            updatePlayerPosition();
-            renderer.render(scene, camera);
+        function gameLoop() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // Draw player
+            ctx.fillStyle = player.color;
+            ctx.fillRect(player.x, player.y, player.width, player.height);
+
+            // Move player with arrow keys
+            if (keys["ArrowUp"]) player.y -= player.speed;
+            if (keys["ArrowDown"]) player.y += player.speed;
+            if (keys["ArrowLeft"]) player.x -= player.speed;
+            if (keys["ArrowRight"]) player.x += player.speed;
+
+            // Spawn new enemies
+            if (Math.random() < 0.02) {
+                let enemy = {
+                    x: Math.random() * canvas.width,
+                    y: 0,
+                    width: 30,
+                    height: 30,
+                    color: "red",
+                    speed: 2
+                };
+                enemies.push(enemy);
+            }
+
+            // Move and draw enemies
+            for (let i = 0; i < enemies.length; i++) {
+                let enemy = enemies[i];
+                enemy.y += enemy.speed;
+                ctx.fillStyle = enemy.color;
+                ctx.fillRect(enemy.x, enemy.y, enemy.width, enemy.height);
+
+                // Check for collision with player
+                if (isCollision(player, enemy)) {
+                    player.health -= 1;
+                    enemies.splice(i, 1);
+                    i--;
+                }
+            }
+
+            // Display health
+            ctx.fillStyle = "#000";
+            ctx.font = "20px Arial";
+            ctx.fillText(`Health: ${player.health}`, 20, 40);
+
+            if (player.health <= 0) {
+                gameOver();
+            }
+
+            requestAnimationFrame(gameLoop);
         }
-        animate();
+
+        // Check for collision
+        function isCollision(player, enemy) {
+            return player.x < enemy.x + enemy.width &&
+                player.x + player.width > enemy.x &&
+                player.y < enemy.y + enemy.height &&
+                player.y + player.height > enemy.y;
+        }
+
+        // Handle key presses
+        let keys = {};
+        window.addEventListener("keydown", (e) => {
+            keys[e.key] = true;
+        });
+        window.addEventListener("keyup", (e) => {
+            keys[e.key] = false;
+        });
+
+        // End game
+        function gameOver() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.fillStyle = "black";
+            ctx.font = "40px Arial";
+            ctx.fillText("Game Over!", canvas.width / 2 - 100, canvas.height / 2);
+        }
+
+        // Start the game
+        gameLoop();
     </script>
 </body>
 </html>
