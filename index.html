@@ -41,8 +41,8 @@
 
         // Player character
         let player = {
-            x: canvas.width / 2,
-            y: canvas.height / 2,
+            x: canvas.width / 2 - 25,  // Start near the bottom center
+            y: canvas.height - 60,  // Near the bottom of the screen
             width: 50,
             height: 50,
             color: "green",
@@ -64,11 +64,9 @@
             ctx.fillStyle = player.color;
             ctx.fillRect(player.x, player.y, player.width, player.height);
 
-            // Move player with arrow keys
-            if (keys["ArrowUp"]) player.y -= player.speed;
-            if (keys["ArrowDown"]) player.y += player.speed;
-            if (keys["ArrowLeft"]) player.x -= player.speed;
-            if (keys["ArrowRight"]) player.x += player.speed;
+            // Move player with arrow keys, restricted to bottom of the screen
+            if (keys["ArrowLeft"] && player.x > 0) player.x -= player.speed;
+            if (keys["ArrowRight"] && player.x < canvas.width - player.width) player.x += player.speed;
 
             // Spawn new enemies (bad blocks)
             if (Math.random() < 0.02) {
@@ -83,8 +81,8 @@
                 enemies.push(enemy);
             }
 
-            // Spawn new healing blocks (good blocks)
-            if (Math.random() < 0.03) {  // Adjust spawn rate
+            // Spawn new healing blocks (good blocks) - rarer now
+            if (Math.random() < 0.01) {  // Reduced spawn rate to make them rarer
                 let healingBlock = {
                     x: Math.random() * canvas.width,
                     y: 0,
