@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Lung Defender</title>
+    <title>Lung Defender with Textures</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -38,13 +38,22 @@
         canvas.width = window.innerWidth;
         canvas.height = window.innerHeight;
 
+        // Load images for player and blocks (using GitHub URLs)
+        const playerImage = new Image();
+        playerImage.src = 'https://raw.githubusercontent.com/lethalcompanyisamazing/HealthGame/main/images/player_texture.png'; // Replace with your GitHub URL
+
+        const enemyImage = new Image();
+        enemyImage.src = 'https://raw.githubusercontent.com/lethalcompanyisamazing/HealthGame/main/images/enemy_texture.png'; // Replace with your GitHub URL
+
+        const healingImage = new Image();
+        healingImage.src = 'https://raw.githubusercontent.com/lethalcompanyisamazing/HealthGame/main/images/healing_texture.png'; // Replace with your GitHub URL
+
         // Player character
         let player = {
-            x: canvas.width / 2 - 25,  // Start near the bottom center
-            y: canvas.height - 60,  // Near the bottom of the screen
+            x: canvas.width / 2 - 25,
+            y: canvas.height - 60,
             width: 50,
             height: 50,
-            color: "green",
             health: 100,
             speed: 5
         };
@@ -54,58 +63,58 @@
 
         // Basic enemy structure
         let enemies = [];
-        
-        // Game time (used to gradually increase speed)
+
+        // Game time (used to gradually increase speed and spawn rate)
         let gameTime = 0;
-        
+
         // Game Loop
         function gameLoop() {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-            // Draw player
-            ctx.fillStyle = player.color;
-            ctx.fillRect(player.x, player.y, player.width, player.height);
+            // Draw player (using texture)
+            ctx.drawImage(playerImage, player.x, player.y, player.width, player.height);
 
             // Move player with arrow keys, restricted to bottom of the screen
             if (keys["ArrowLeft"] && player.x > 0) player.x -= player.speed;
             if (keys["ArrowRight"] && player.x < canvas.width - player.width) player.x += player.speed;
 
+            // Increase game time (used to make blocks fall faster and spawn more)
+            gameTime += 1;
+
+            // Gradually increase spawn rate (more blocks fall as time passes)
+            const spawnRate = 0.02 + gameTime / 5000;
+            const healingSpawnRate = 0.001 + gameTime / 10000;
+
             // Spawn new enemies (bad blocks)
-            if (Math.random() < 0.02) {
+            if (Math.random() < spawnRate) {
                 let enemy = {
                     x: Math.random() * canvas.width,
                     y: 0,
                     width: 30,
                     height: 30,
-                    color: "red",
                     speed: 2  // Initial speed
                 };
                 enemies.push(enemy);
             }
 
-            // Spawn new healing blocks (good blocks) - extremely rare
-            if (Math.random() < 0.001) {  // Very low spawn rate (0.1% chance)
+            // Spawn new healing blocks (good blocks)
+            if (Math.random() < healingSpawnRate) {  // Very low spawn rate (increases over time)
                 let healingBlock = {
                     x: Math.random() * canvas.width,
                     y: 0,
                     width: 30,
                     height: 30,
-                    color: "blue",
                     speed: 2  // Initial speed
                 };
                 healingBlocks.push(healingBlock);
             }
-
-            // Increase game time (used to make blocks fall faster)
-            gameTime += 1;
 
             // Move and draw enemies (bad blocks)
             for (let i = 0; i < enemies.length; i++) {
                 let enemy = enemies[i];
                 enemy.y += enemy.speed;
                 enemy.speed = 2 + gameTime / 500;  // Gradually increase speed over time
-                ctx.fillStyle = enemy.color;
-                ctx.fillRect(enemy.x, enemy.y, enemy.width, enemy.height);
+                ctx.drawImage(enemyImage, enemy.x, enemy.y, enemy.width, enemy.height); // Draw using texture
 
                 // Check for collision with player (bad block)
                 if (isCollision(player, enemy)) {
@@ -120,8 +129,7 @@
                 let block = healingBlocks[i];
                 block.y += block.speed;  // Healing blocks fall like enemies
                 block.speed = 2 + gameTime / 1000;  // Gradually increase speed for healing blocks as well
-                ctx.fillStyle = block.color;
-                ctx.fillRect(block.x, block.y, block.width, block.height);
+                ctx.drawImage(healingImage, block.x, block.y, block.width, block.height); // Draw using texture
 
                 // Check for collision with player (healing block)
                 if (isCollision(player, block)) {
