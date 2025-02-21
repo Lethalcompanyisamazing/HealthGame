@@ -56,6 +56,9 @@
         // Basic enemy structure
         let enemies = [];
         
+        // Block speed increasing over time
+        let fallSpeedIncrement = 0.1;
+
         // Game Loop
         function gameLoop() {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -81,8 +84,8 @@
                 enemies.push(enemy);
             }
 
-            // Spawn new healing blocks (good blocks) - much rarer now
-            if (Math.random() < 0.005) {  // Further reduced spawn rate to make them rarer (0.5% chance)
+            // Spawn new healing blocks (good blocks) - extremely rare
+            if (Math.random() < 0.001) {  // Very low spawn rate (0.1% chance)
                 let healingBlock = {
                     x: Math.random() * canvas.width,
                     y: 0,
@@ -98,6 +101,7 @@
             for (let i = 0; i < enemies.length; i++) {
                 let enemy = enemies[i];
                 enemy.y += enemy.speed;
+                enemy.speed += fallSpeedIncrement;  // Gradually increase the falling speed
                 ctx.fillStyle = enemy.color;
                 ctx.fillRect(enemy.x, enemy.y, enemy.width, enemy.height);
 
@@ -113,6 +117,7 @@
             for (let i = 0; i < healingBlocks.length; i++) {
                 let block = healingBlocks[i];
                 block.y += block.speed;  // Healing blocks fall like enemies
+                block.speed += fallSpeedIncrement;  // Increase falling speed for healing blocks as well
                 ctx.fillStyle = block.color;
                 ctx.fillRect(block.x, block.y, block.width, block.height);
 
