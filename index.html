@@ -1,132 +1,155 @@
-<script>
-    const playerImage = new Image();
-    playerImage.src = 'https://raw.githubusercontent.com/lethalcompanyisamazing/HealthGame/main/images/player_texture.png';
-
-    const enemyImage = new Image();
-    enemyImage.src = 'https://raw.githubusercontent.com/lethalcompanyisamazing/HealthGame/main/images/enemy_texture.png';
-
-    const healingImage = new Image();
-    healingImage.src = 'https://raw.githubusercontent.com/lethalcompanyisamazing/HealthGame/main/images/healing_texture.png';
-
-    // Get the canvas
-    const canvas = document.getElementById("gameCanvas");
-    const ctx = canvas.getContext("2d");
-
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
-
-    // Player character
-    let player = {
-        x: canvas.width / 2 - 25,
-        y: canvas.height - 100, // Moved higher
-        width: 100,
-        height: 100,
-        health: 100,
-        speed: 5
-    };
-
-    let enemies = [];
-    let healingBlocks = [];
-    let gameTime = 0; // Used to gradually speed things up
-
-    // Game Loop
-    function gameLoop() {
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-        // Draw player
-        ctx.drawImage(playerImage, player.x, player.y, player.width, player.height);
-
-        // Move player left/right
-        if (keys["ArrowLeft"] && player.x > 0) player.x -= player.speed;
-        if (keys["ArrowRight"] && player.x < canvas.width - player.width) player.x += player.speed;
-
-        // Increase game time
-        gameTime++;
-
-        // **Adjusted spawn rates and speeds**
-        const spawnRate = 0.005 + gameTime / 7000;  // Slower start, increases over time
-        const healingSpawnRate = 0.0005 + gameTime / 15000;  // Healing blocks are even rarer
-        const baseSpeed = 1.5 + gameTime / 6000;  // Slower start, speeds up over time
-
-        // Spawn bad blocks
-        if (Math.random() < spawnRate) {
-            let enemy = {
-                x: Math.random() * canvas.width,
-                y: 0,
-                width: 60,
-                height: 60,
-                speed: baseSpeed
-            };
-            enemies.push(enemy);
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Health Game</title>
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
         }
 
-        // Spawn healing blocks
-        if (Math.random() < healingSpawnRate) {
-            let healingBlock = {
-                x: Math.random() * canvas.width,
-                y: 0,
-                width: 60,
-                height: 60,
-                speed: baseSpeed
-            };
-            healingBlocks.push(healingBlock);
+        canvas {
+            display: block;
+            background-color: #f0f0f0; /* Light background color */
         }
+    </style>
+</head>
+<body>
+    <canvas id="gameCanvas"></canvas>
 
-        // Move and draw enemies
-        for (let i = 0; i < enemies.length; i++) {
-            let enemy = enemies[i];
-            enemy.y += enemy.speed;
-            ctx.drawImage(enemyImage, enemy.x, enemy.y, enemy.width, enemy.height);
+    <script>
+        const playerImage = new Image();
+        playerImage.src = 'https://raw.githubusercontent.com/lethalcompanyisamazing/HealthGame/main/images/player_texture.png';
 
-            if (isCollision(player, enemy)) {
-                player.health -= 10;
-                enemies.splice(i, 1);
-                i--;
+        const enemyImage = new Image();
+        enemyImage.src = 'https://raw.githubusercontent.com/lethalcompanyisamazing/HealthGame/main/images/enemy_texture.png';
+
+        const healingImage = new Image();
+        healingImage.src = 'https://raw.githubusercontent.com/lethalcompanyisamazing/HealthGame/main/images/healing_texture.png';
+
+        // Get the canvas
+        const canvas = document.getElementById("gameCanvas");
+        const ctx = canvas.getContext("2d");
+
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        // Player character
+        let player = {
+            x: canvas.width / 2 - 25,
+            y: canvas.height - 100, // Moved higher
+            width: 100,
+            height: 100,
+            health: 100,
+            speed: 5
+        };
+
+        let enemies = [];
+        let healingBlocks = [];
+        let gameTime = 0; // Used to gradually speed things up
+
+        // Game Loop
+        function gameLoop() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // Draw player
+            ctx.drawImage(playerImage, player.x, player.y, player.width, player.height);
+
+            // Move player left/right
+            if (keys["ArrowLeft"] && player.x > 0) player.x -= player.speed;
+            if (keys["ArrowRight"] && player.x < canvas.width - player.width) player.x += player.speed;
+
+            // Increase game time
+            gameTime++;
+
+            // **Adjusted spawn rates and speeds**
+            const spawnRate = 0.005 + gameTime / 7000;  // Slower start, increases over time
+            const healingSpawnRate = 0.0005 + gameTime / 15000;  // Healing blocks are even rarer
+            const baseSpeed = 1.5 + gameTime / 6000;  // Slower start, speeds up over time
+
+            // Spawn bad blocks
+            if (Math.random() < spawnRate) {
+                let enemy = {
+                    x: Math.random() * canvas.width,
+                    y: 0,
+                    width: 60,
+                    height: 60,
+                    speed: baseSpeed
+                };
+                enemies.push(enemy);
             }
-        }
 
-        // Move and draw healing blocks
-        for (let i = 0; i < healingBlocks.length; i++) {
-            let block = healingBlocks[i];
-            block.y += block.speed;
-            ctx.drawImage(healingImage, block.x, block.y, block.width, block.height);
-
-            if (isCollision(player, block)) {
-                player.health = Math.min(100, player.health + 10);
-                healingBlocks.splice(i, 1);
-                i--;
+            // Spawn healing blocks
+            if (Math.random() < healingSpawnRate) {
+                let healingBlock = {
+                    x: Math.random() * canvas.width,
+                    y: 0,
+                    width: 60,
+                    height: 60,
+                    speed: baseSpeed
+                };
+                healingBlocks.push(healingBlock);
             }
+
+            // Move and draw enemies
+            for (let i = 0; i < enemies.length; i++) {
+                let enemy = enemies[i];
+                enemy.y += enemy.speed;
+                ctx.drawImage(enemyImage, enemy.x, enemy.y, enemy.width, enemy.height);
+
+                if (isCollision(player, enemy)) {
+                    player.health -= 10;
+                    enemies.splice(i, 1);
+                    i--;
+                }
+            }
+
+            // Move and draw healing blocks
+            for (let i = 0; i < healingBlocks.length; i++) {
+                let block = healingBlocks[i];
+                block.y += block.speed;
+                ctx.drawImage(healingImage, block.x, block.y, block.width, block.height);
+
+                if (isCollision(player, block)) {
+                    player.health = Math.min(100, player.health + 10);
+                    healingBlocks.splice(i, 1);
+                    i--;
+                }
+            }
+
+            // Draw health
+            ctx.fillStyle = "#000";
+            ctx.font = "20px Arial";
+            ctx.fillText(`Health: ${player.health}`, 20, 40);
+
+            if (player.health <= 0) {
+                gameOver();
+            }
+
+            requestAnimationFrame(gameLoop);
         }
 
-        // Draw health
-        ctx.fillStyle = "#000";
-        ctx.font = "20px Arial";
-        ctx.fillText(`Health: ${player.health}`, 20, 40);
-
-        if (player.health <= 0) {
-            gameOver();
+        function isCollision(player, entity) {
+            return player.x < entity.x + entity.width &&
+                   player.x + player.width > entity.x &&
+                   player.y < entity.y + entity.height &&
+                   player.y + player.height > entity.y;
         }
 
-        requestAnimationFrame(gameLoop);
-    }
+        let keys = {};
+        window.addEventListener("keydown", (e) => keys[e.key] = true);
+        window.addEventListener("keyup", (e) => keys[e.key] = false);
 
-    function isCollision(player, entity) {
-        return player.x < entity.x + entity.width &&
-               player.x + player.width > entity.x &&
-               player.y < entity.y + entity.height &&
-               player.y + player.height > entity.y;
-    }
+        function gameOver() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.fillStyle = "black";
+            ctx.font = "40px Arial";
+            ctx.fillText("Game Over!", canvas.width / 2 - 100, canvas.height / 2);
+        }
 
-    let keys = {};
-    window.addEventListener("keydown", (e) => keys[e.key] = true);
-    window.addEventListener("keyup", (e) => keys[e.key] = false);
-
-    function gameOver() {
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-        ctx.fillStyle = "black";
-        ctx.font = "40px Arial";
-        ctx.fillText("Game Over!", canvas.width / 2 - 100, canvas.height / 2);
-    }
-
-    gameLoop();
-</script>
+        gameLoop();
+    </script>
+</body>
+</html>
